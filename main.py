@@ -1,72 +1,88 @@
 import os
+from flask import Flask, render_template_string, request, redirect, url_for, session
 import csv
-from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
+app.secret_key = 'supersecretkey'  # Needed for session
+app.config['BASE_FOLDER'] = 'uploads'
 
-# Configuration
-app.config['UPLOAD_FOLDER'] = 'uploads/documents/'
-app.config['CSV_FOLDER'] = 'uploads/csv_files/'
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-os.makedirs(app.config['CSV_FOLDER'], exist_ok=True)
+# HTML Templates
+setup_html = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Setup Directory</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Setup Directory</h1>
+    <form method="post">
+        <label for="base_folder">Base Folder:</label>
+        <input type="text" id="base_folder" name="base_folder" value="uploads" required><br>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
+"""
 
-# Route for the home page
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    if request.method == 'POST':
-        name = request.form['name']
-        department = request.form['department']
-        registration_id = request.form['registration_id']
-        document = request.files['document']
-
-        if document:
-            document_filename = document.filename
-            document.save(os.path.join(app.config['UPLOAD_FOLDER'], document_filename))
-
-            csv_file_path = os.path.join(app.config['CSV_FOLDER'], f"{name}.csv")
-            with open(csv_file_path, 'a', newline='') as csvfile:
-                writer = csv.writer(csvfile)
-                writer.writerow([name, department, registration_id, document_filename])
-
-            return redirect(url_for('index'))
-
-    return render_template('index.html')
-
-# Route for viewing data
-@app.route('/view_data')
-def view_data():
-    data = []
-    for csv_file in os.listdir(app.config['CSV_FOLDER']):
-        if csv_file.endswith('.csv'):
-            with open(os.path.join(app.config['CSV_FOLDER'], csv_file), 'r') as csvfile:
-                reader = csv.reader(csvfile)
-                for row in reader:
-                    data.append(row)
-    return render_template('view_data.html', data=data)
-
-# Route for stopping the application
-@app.route('/stop_application')
-def stop_application():
-    data = []
-    for csv_file in os.listdir(app.config['CSV_FOLDER']):
-        if csv_file.endswith('.csv'):
-            with open(os.path.join(app.config['CSV_FOLDER'], csv_file), 'r') as csvfile:
-                reader = csv.reader(csvfile)
-                for row in reader:
-                    data.append(row)
-    return render_template('stop_application.html', data=data)
-
-# Main function
-if __name__ == '__main__':
-    app.run(debug=True)
-
-# Templates
-index_html = '''
+index_html = """
 <!DOCTYPE html>
 <html>
 <head>
     <title>User Data Collection</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ddd;
+        }
+    </style>
 </head>
 <body>
     <h1>User Data Collection</h1>
@@ -85,14 +101,33 @@ index_html = '''
     <a href="{{ url_for('stop_application') }}"><button>Stop Application</button></a>
 </body>
 </html>
-'''
+"""
 
-view_data_html = '''
+view_data_html = """
 <!DOCTYPE html>
 <html>
 <head>
     <title>View Data</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse.
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <h1>Collected Data</h1>
@@ -118,14 +153,33 @@ view_data_html = '''
     </table>
 </body>
 </html>
-'''
+"""
 
-stop_application_html = '''
+stop_application_html = """
 <!DOCTYPE html>
 <html>
 <head>
     <title>Application Stopped</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center.
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse.
+        }
+        table, th, td {
+            border: 1px solid black.
+        }
+        th, td {
+            padding: 10px.
+            text-align: center.
+        }
+    </style>
 </head>
 <body>
     <h1>Final Collected Data</h1>
@@ -151,62 +205,96 @@ stop_application_html = '''
     </table>
 </body>
 </html>
-'''
+"""
 
-# CSS
-style_css = '''
-body {
-    font-family: Arial, sans-serif;
-}
 
-h1 {
-    text-align: center;
-}
+@app.route('/setup', methods=['GET', 'POST'])
+def setup():
+    if request.method == 'POST':
+        base_folder = request.form['base_folder']
+        session['base_folder'] = base_folder
 
-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+        upload_folder = os.path.join(base_folder, 'documents')
+        csv_folder = os.path.join(base_folder, 'csv_files')
 
-table {
-    width: 80%;
-    margin: 20px auto;
-    border-collapse: collapse;
-}
+        session['upload_folder'] = upload_folder
+        session['csv_folder'] = csv_folder
 
-table, th, td {
-    border: 1px solid black;
-}
+        os.makedirs(upload_folder, exist_ok=True)
+        os.makedirs(csv_folder, exist_ok=True)
 
-th, td {
-    padding: 10px;
-    text-align: center;
-}
+        return redirect(url_for('index'))
+    return render_template_string(setup_html)
 
-button {
-    margin: 10px;
-    padding: 10px 20px;
-    cursor: pointer;
-}
 
-button:hover {
-    background-color: #ddd;
-}
-'''
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if 'base_folder' not in session:
+        # Check if the base directory exists on startup
+        base_folder = app.config['BASE_FOLDER']
+        upload_folder = os.path.join(base_folder, 'documents')
+        csv_folder = os.path.join(base_folder, 'csv_files')
+        if os.path.exists(upload_folder) and os.path.exists(csv_folder):
+            session['base_folder'] = base_folder
+            session['upload_folder'] = upload_folder
+            session['csv_folder'] = csv_folder
+        else:
+            return redirect(url_for('setup'))
 
-# Write templates and static files
-os.makedirs('templates', exist_ok=True)
-os.makedirs('static/css', exist_ok=True)
+    upload_folder = session['upload_folder']
+    csv_folder = session['csv_folder']
 
-with open('templates/index.html', 'w') as f:
-    f.write(index_html)
+    if request.method == 'POST':
+        name = request.form['name']
+        department = request.form['department']
+        registration_id = request.form['registration_id']
+        document = request.files['document']
 
-with open('templates/view_data.html', 'w') as f:
-    f.write(view_data_html)
+        if document:
+            document_filename = document.filename
+            document.save(os.path.join(upload_folder, document_filename))
 
-with open('templates/stop_application.html', 'w') as f:
-    f.write(stop_application_html)
+            csv_file_path = os.path.join(csv_folder, f"{name}.csv")
+            with open(csv_file_path, 'a', newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow([name, department, registration_id, document_filename])
 
-with open('static/css/style.css', 'w') as f:
-    f.write(style_css)
+            return redirect(url_for('index'))
+
+    return render_template_string(index_html)
+
+
+@app.route('/view_data')
+def view_data():
+    if 'csv_folder' not in session:
+        return redirect(url_for('setup'))
+
+    csv_folder = session['csv_folder']
+    data = []
+    for csv_file in os.listdir(csv_folder):
+        if csv_file.endswith('.csv'):
+            with open(os.path.join(csv_folder, csv_file), 'r') as csvfile:
+                reader = csv.reader(csvfile)
+                for row in reader:
+                    data.append(row)
+    return render_template_string(view_data_html, data=data)
+
+
+@app.route('/stop_application')
+def stop_application():
+    if 'csv_folder' not in session:
+        return redirect(url_for('setup'))
+
+    csv_folder = session['csv_folder']
+    data = []
+    for csv_file in os.listdir(csv_folder):
+        if csv_file.endswith('.csv'):
+            with open(os.path.join(csv_folder, csv_file), 'r') as csvfile:
+                reader = csv.reader(csvfile)
+                for row in reader:
+                    data.append(row)
+    return render_template_string(stop_application_html, data=data)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
