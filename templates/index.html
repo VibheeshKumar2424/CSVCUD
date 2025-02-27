@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><title>User Data Collection</title></head>
+<body>
+    <h1>User Data Collection</h1>
+    <form method="post" enctype="multipart/form-data">
+        <input type="text" name="name" placeholder="Name" required><br>
+        <input type="text" name="department" placeholder="Department" required><br>
+        <input type="text" name="registration_id" placeholder="Registration ID" required><br>
+        <input type="file" name="document" required><br>
+        <button type="submit">Submit</button>
+    </form>
+    <a href="{{ url_for('view_data') }}"><button>View Data</button></a>
+    <a href="{{ url_for('stop_application') }}"><button>Stop Application</button></a>
+</body>
+</html>

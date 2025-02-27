@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><title>Application Stopped</title></head>
+<body>
+    <h1>Final Collected Data</h1>
+    <table border="1">
+        <tr>
+            <th>Name</th><th>Department</th><th>Registration ID</th><th>Document</th>
+        </tr>
+        {% for row in data %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
